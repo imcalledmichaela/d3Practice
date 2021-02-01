@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+    <style>
+        .bar {
+            fill: steelblue;
+        }
+    </style>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+<body>
+<!-- Create a div where the graph will take place -->
+<div id="my_dataviz"></div>
+<script>
+    // create an svg element
+    var margin = {top: 10, right: 30, bottom: 30, left: 60},
+        width = 460 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
+    
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+    svg.append("text")
+       .attr("transform", "translate(0,0)")
+       .attr("x", 20)
+       .attr("y", 50)
+       .attr("font-size", "17px")
+       .text("XYZ Foods Stock Price")
+
+    var xScale = d3.scaleBand().range([0, width]).padding(0.4),
+        yScale = d3.scaleLinear().range([height, 0]);
+
+    // create a group for the svg
+    var g = svg.append("g")
+               .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+    d3.csv("XYZ.csv", function(error, data) {
+        if (error) {
+            throw error;
+        }
+
+        // setting range of x and y axis
+        xScale.domain(data.map(function(d) { return d.year; }));
+        yScale.domain([0, d3.max(data, function(d) { return d.value; })]);
+
+        // adding the x axis to the group 
+        svg.append("g")
+         .attr("transform", "translate(0," + height + ")")
+         .call(d3.axisBottom(xScale))
+         .append("text")
+         .attr("y", height - 250)
+         .attr("x", width - 100)
+         .attr("text-anchor", "end")
+         .attr("stroke", "black")
+         .text("Year");
+
+        // same with x axis, add y axis to the group
+        svg.append("g")
+         .call(d3.axisLeft(yScale).tickFormat(function(d){
+             return "$" + d;
+         })
+         .ticks(10))
+         .append("text")
+         .attr("transform", "rotate(-90)")
+         .attr("y", 6)
+         .attr("dy", "-5.1em")
+         .attr("text-anchor", "end")
+         .attr("stroke", "black")
+         .text("Stock Price");
+         // ticks sets currency value to the y axis
+
+        // creates bars for corresponding values
+
+        svg.selectAll(".bar")
+         .data(data)
+         .enter().append("rect")
+         .attr("class", "bar")
+         // pass values according to x and y scale created earlier
+         .attr("x", function(d) { return xScale(d.year); })
+         // width of each rect defined by padding and range from xscale
+         .attr("width", xScale.bandwidth())
+         // start with height at 0 on yScale, transition will build up and draw the data y values
+         .attr("height", function(d) { return height - yScale(0); })
+         .attr("y", function(d) { return yScale(0); });
+
+        // create transition using .transition()
+        svg.selectAll("rect")
+         .transition()
+         // change speed of transition
+         .duration(800)
+         // set the y values according to data
+         .attr("y", function(d) { return yScale(d.value); })
+         // height of each bar will be bottom height - yScaled y data
+         .attr("height", function(d) { return height - yScale(d.value); })
+         // allows each bar to rise up individually first 
+         .delay(function(d,i){console.log(i) ; return(i*100)})
+    });
+
+</script>
+</body>
+</html>
