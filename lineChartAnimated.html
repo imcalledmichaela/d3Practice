@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<!-- Create a div where the graph will take place -->
+<div id="my_dataviz"></div>
+<script>
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 30, bottom: 30, left: 60},
+        width = 460 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
+    
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+    
+    //Read the data
+    d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/3_TwoNumOrdered_comma.csv",
+    
+      // When reading the csv, I must format variables:
+      function(d){
+        return { date : d3.timeParse("%Y-%m-%d")(d.date), value : d.value }
+      },
+    
+      // Now I can use this dataset:
+      function(data) {
+    
+        // Add X axis --> it is a date format
+        // x axis scaled according to time
+        var x = d3.scaleTime()
+          .domain(d3.extent(data, function(d) { return d.date; }))
+          // extent returns the min and max of an output
+          .range([ 0, width ]);
+        svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x));
+    
+        // Add Y axis
+        // set y axis from 0 to max value
+        var y = d3.scaleLinear()
+          .domain([0, d3.max(data, function(d) { return +d.value; })])
+          .range([ height, 0 ]);
+        svg.append("g")
+          .call(d3.axisLeft(y));
+
+        var line = d3.line()
+              .x(function(d) { return x(d.date) })
+              .y(function(d) { return y(d.value) });
+              
+        // creating the path for the line chart 
+        // setting the colour and thickness for the line
+        var path = svg.append("path")
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", "steelblue")
+            .attr("stroke-width", 1.5)
+            .attr("class", "line")
+            .attr("d", line);
+
+        // variable to store total length
+        var totalLength = path.node().getTotalLength();
+
+        // stroke dash array is what we create when drawing out a line
+        // to draw a line, we are creating an array of dashes and gaps 
+        path.attr("stroke-dasharray", totalLength + " " + totalLength)
+        // stroke dash offset specifies the distance into the dash pattern to start the dash
+            .attr("stroke-dashoffset", totalLength)
+          .transition() // Call Transition Method
+            .duration(4000) // Set Duration timing (ms)
+            .ease(d3.easeLinear) // Set Easing option
+            .attr("stroke-dashoffset", 0);
+
+        // basically set the end point that you want to go to, 
+        // transition starts from the 0 point until it reaches there
+
+    })
+    
+    </script>
