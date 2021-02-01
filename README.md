@@ -1,4 +1,4 @@
 # d3Practice
 
 ## run `python -m http.server` to begin
-## open [localhost:8000]
+## open [localhost](http://localhost:8000/d3Practice)
