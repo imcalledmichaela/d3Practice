@@ -8,69 +8,69 @@
 <button id="reset">Reset</button>
 <script>
 
-    // set the dimensions and margins of the graph
-    var margin = {top: 10, right: 30, bottom: 30, left: 60},
-        width = 460 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom;
-    
-    // append the svg object to the body of the page
-    var svg = d3.select("#my_dataviz")
-      .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-        .attr("transform",
-              "translate(" + margin.left + "," + margin.top + ")");
-    
-    var xScale = d3.scaleBand().range([0, width]).padding(0.4),
-        yScale = d3.scaleLinear().range([height, 0]);
-    //Read the data
-    d3.csv("XYZ.csv",
-      // Now I can use this dataset:
-      function(data) {
-        // Add X axis
-        // x axis scaled according to time
-        xScale.domain(data.map(function(d) { return d.year; }));
+  // set the dimensions and margins of the graph
+  var margin = { top: 10, right: 30, bottom: 30, left: 60 },
+    width = 460 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
 
-        svg.append("g")
-          .attr("transform", "translate(0," + height + ")")
-          .call(d3.axisBottom(xScale));
-    
-        // Add Y axis
-        // set y axis from 0 to max value
-        yScale.domain([0, d3.max(data, function(d) { return +d.value; })])
-            .range([ height, 0 ]);
-        svg.append("g")
-          .call(d3.axisLeft(yScale));
+  // append the svg object to the body of the page
+  var svg = d3.select("#my_dataviz")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform",
+      "translate(" + margin.left + "," + margin.top + ")");
 
-        var line = d3.line()
-            .x(function(d) { return xScale(d.year) })
-            .y(function(d) { return yScale(d.value) });
+  var xScale = d3.scaleBand().range([0, width]).padding(0.4),
+    yScale = d3.scaleLinear().range([height, 0]);
+  //Read the data
+  d3.csv("XYZ.csv",
+    // Now I can use this dataset:
+    function (data) {
+      // Add X axis
+      // x axis scaled according to time
+      xScale.domain(data.map(function (d) { return d.year; }));
 
-            // only calls the method to start drawing the line when the button is pressed
-            d3.select("#start").on("click", function() {
-              var path = svg.append("path")
-                  .datum(data)
-                  .attr("class", "line")
-                  .attr("fill", "none")
-                  .attr("stroke", "steelblue")
-                  .attr("stroke-width", 1.5)
-                  .attr("d", line);
+      svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(xScale));
 
-              var totalLength = path.node().getTotalLength();
+      // Add Y axis
+      // set y axis from 0 to max value
+      yScale.domain([0, d3.max(data, function (d) { return +d.value; })])
+        .range([height, 0]);
+      svg.append("g")
+        .call(d3.axisLeft(yScale));
 
-              path.attr("stroke-dasharray", totalLength + " " + totalLength)
-                .attr("stroke-dashoffset", totalLength)
-              .transition() 
-                .duration(4000) 
-                .ease(d3.easeLinear) 
-                .attr("stroke-dashoffset", 0);
-            });
+      var line = d3.line()
+        .x(function (d) { return xScale(d.year) })
+        .y(function (d) { return yScale(d.value) });
 
-            // resets Animation
-            d3.select("#reset").on("click", function() {
-              d3.select(".line").remove();
-            });
+      // only calls the method to start drawing the line when the button is pressed
+      d3.select("#start").on("click", function () {
+        var path = svg.append("path")
+          .datum(data)
+          .attr("class", "line")
+          .attr("fill", "none")
+          .attr("stroke", "steelblue")
+          .attr("stroke-width", 1.5)
+          .attr("d", line);
+
+        var totalLength = path.node().getTotalLength();
+
+        path.attr("stroke-dasharray", totalLength + " " + totalLength)
+          .attr("stroke-dashoffset", totalLength)
+          .transition()
+          .duration(4000)
+          .ease(d3.easeLinear)
+          .attr("stroke-dashoffset", 0);
+      });
+
+      // resets Animation
+      d3.select("#reset").on("click", function () {
+        d3.select(".line").remove();
+      });
     })
-    
-    </script>
+
+</script>
