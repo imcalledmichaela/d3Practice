@@ -10,6 +10,7 @@ templates = Jinja2Templates(directory='templates')
 
 async def homepage(request):
     template = "sse-client.html"
+    # template = "sse-client.html"
     context = {"request": request}
     return templates.TemplateResponse(template, context)
 

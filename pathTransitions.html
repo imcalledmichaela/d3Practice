@@ -54,9 +54,8 @@
     // add x axis
     g.append("g")
         .attr("class", "xAxis")
-        .attr("transform", "translate(0" + y(0) + ")");
-    // .call(d3.axisBottom(x));
-    // commented out call because we don't want to display the x axis
+        .attr("transform", "translate(0," + y(0) + ")")
+        .call(d3.axisBottom(x));
 
     // add y axis
     g.append("g")
