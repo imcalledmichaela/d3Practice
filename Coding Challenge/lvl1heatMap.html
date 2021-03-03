@@ -34,13 +34,12 @@
             if (!years.includes(year)) {
                 years.push(year)
             }
-            return { year: year, month: months[month], temperature: d.min_temperature + d.max_temperature }
+            return { year: year, month: months[month], min_temp: d.min_temperature, max_temp: d.max_temperature }
         },
 
 
         // Now I can use this dataset:
         function (data) {
-            console.log(years)
             // Add X axis --> it is a date format
             // x axis scaled according to time
             var xScale = d3.scaleBand()
@@ -61,7 +60,32 @@
 
             var myColor = d3.scaleSequential()
                 .interpolator(d3.interpolateInferno)
-                .domain(data.map(function(d) { return d.temperature }))
+                .domain([1, 50])
+            // .domain(data.map(function(d) { return d.temperature }))
+
+            var tooltip = d3.select("#my_dataviz")
+                .append("rect")
+                .style("opacity", 0)
+                .attr("class", "tooltip")
+                .style("background-color", "white")
+                .style("border", "solid")
+                .style("border-width", "2px")
+                .style("border-radius", "5px")
+                .style("padding", "5px")
+
+            // Three function that change the tooltip when user hover / move / leave a cell
+            var mouseover = function (d) {
+                tooltip.style("opacity", 1)
+            }
+            var mousemove = function (d) {
+                tooltip
+                    .html("Date: " + d.year + "-" + d.month + "; max: " + d.max_temp + "; min: " + d.min_temp)
+                    .style("left", (d3.mouse(this)[0]) + "px")
+                    .style("top", (d3.mouse(this)[1]) + "px")
+            }
+            var mouseleave = function (d) {
+                tooltip.style("opacity", 0)
+            }
 
             svg.selectAll()
                 .data(data, function (d) { return d.year + ':' + d.month; })
@@ -73,9 +97,12 @@
                 .attr("ry", 4)
                 .attr("width", xScale.bandwidth())
                 .attr("height", yScale.bandwidth())
-                .style("fill", function (d) { console.log(d.temperature); myColor(d.temperature) })
+                .style("fill", function (d) { return myColor(d.min_temp) })
                 .style("stroke-width", 4)
                 .style("stroke", "none")
                 .style("opacity", 0.8)
+                .on("mouseover", mouseover)
+                .on("mousemove", mousemove)
+                .on("mouseleave", mouseleave)
         })
 </script>
