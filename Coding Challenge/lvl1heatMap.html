@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<!-- Create a div where the graph will take place -->
+<div id="my_dataviz"></div>
+<script>
+    // set the dimensions and margins of the graph
+    var margin = { top: 100, right: 100, bottom: 100, left: 100 },
+        width = 1000 - margin.left - margin.right,
+        height = 700 - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+    var years = []
+    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    var dataa = []
+
+    d3.csv("https://raw.githubusercontent.com/HKUST-VISLab/coding-challenge/master/temperature_daily.csv",
+        // When reading the csv, I must format variables:
+        function (d) {
+            date = d3.timeParse("%Y-%m-%d")(d.date)
+            year = date.getFullYear()
+            month = date.getMonth()
+            if (!years.includes(year)) {
+                years.push(year)
+            }
+            return { year: year, month: months[month], temperature: d.min_temperature + d.max_temperature }
+        },
+
+
+        // Now I can use this dataset:
+        function (data) {
+            console.log(years)
+            // Add X axis --> it is a date format
+            // x axis scaled according to time
+            var xScale = d3.scaleBand()
+                .domain(data.map(function (d) { return d.year; }))
+                .range([0, width]);
+            svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale).ticks(years.length));
+
+            // Add Y axis
+            // set y axis from 0 to max value
+            var yScale = d3.scaleBand()
+                .range([height, 0])
+                .domain(data.map(function (d) { return d.month; }))
+                .padding(0.01);
+            svg.append("g")
+                .call(d3.axisLeft(yScale));
+
+            var myColor = d3.scaleSequential()
+                .interpolator(d3.interpolateInferno)
+                .domain(data.map(function(d) { return d.temperature }))
+
+            svg.selectAll()
+                .data(data, function (d) { return d.year + ':' + d.month; })
+                .enter()
+                .append("rect")
+                .attr("x", function (d) { return xScale(d.year) })
+                .attr("y", function (d) { return yScale(d.month) })
+                .attr("rx", 4)
+                .attr("ry", 4)
+                .attr("width", xScale.bandwidth())
+                .attr("height", yScale.bandwidth())
+                .style("fill", function (d) { console.log(d.temperature); myColor(d.temperature) })
+                .style("stroke-width", 4)
+                .style("stroke", "none")
+                .style("opacity", 0.8)
+        })
+</script>
